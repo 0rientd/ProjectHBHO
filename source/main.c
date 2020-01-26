@@ -1,22 +1,23 @@
+// v0.0.1
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <3ds.h>
 #include <time.h>
+#include <3ds.h>
 
-int main () {
+int main() {
 	
-	//////////////////////////////////////////
-	
-	gfxInitDefault(); // 3ds.h | inicia a tela
-	
-	PrintConsole TelaDeCima, TelaDeBaixo; //3ds.h | Aqui você escolhe o nome das variaveis para setar onde quer printar algo na tela
+	gfxInitDefault(); // inicia framebuffer LCD com o padrão GSP_BGR8_OES
 
-	consoleInit ( GFX_TOP, &TelaDeCima ); // Iniciando a tela de cima
-	consoleInit ( GFX_BOTTOM, &TelaDeBaixo ); // Iniciando a tela de baixo
+	PrintConsole top_screen, bottom_screen;
+	consoleInit ( GFX_TOP, &top_screen ); // Iniciando a tela de cima
+	consoleInit ( GFX_BOTTOM, &bottom_screen ); // Iniciando a tela de baixo
+
+	consoleSelect(&top_screen);
 	
 	int count = 0;
 
-	srand ( time ( NULL ) );
+	srand(time(NULL));
 	
 	int button = 0;
 	int num_random = rand() % 5;
@@ -25,10 +26,15 @@ int main () {
 		num_random++;
 		
 	}
-	
-	consoleSelect ( &TelaDeCima ); // Selecionando tela de baixo
-	
-	//////////////////////////////////////////
+
+	static SwkbdState teclado;
+	static char buffer_para_teclado[60];
+	SwkbdButton vButtonKB = SWKBD_BUTTON_NONE;
+
+	swkbdInit(&teclado, SWKBD_TYPE_NORMAL, 1, -3);
+	swkbdSetInitialText(&teclado, buffer_para_teclado);
+	swkbdSetHintText(&teclado, "Please enter your name");
+	vButtonKB = swkbdInputText(&teclado, buffer_para_teclado, sizeof(buffer_para_teclado));
 	
 	while ( aptMainLoop() ) { // Loop do sistena para manter scan
 
@@ -37,9 +43,18 @@ int main () {
 	
 		int Horas = Horario -> tm_hour; // variavel para horas
 		int Minutos = Horario -> tm_min; // varaivel para minutos
+		int Segundos = Horario -> tm_sec; // variavel para segundos
 	
-		printf ("Bem vindo ao ProjectHBHO do HackerOrientado\n");
-		printf ("Hora atual -> %02i:%02i\n\n", Horas, Minutos);
+		u32 kDown = hidKeysDown(); /// unsigned int 32 bit
+
+		if ( vButtonKB == SWKBD_BUTTON_NONE ) {
+
+			return main();
+
+		}
+
+		printf ("Seja bem vindo %s ao ProjectHBHO do HackerOrientado\n", buffer_para_teclado);
+		printf ("Hora atual -> %02i:%02i:%02i\n\n", Horas, Minutos, Segundos);
 
 		printf ("Pressione START para voltar ao HBL\n\n");
 		
@@ -50,11 +65,9 @@ int main () {
 		gfxFlushBuffers(); // limpa o buffer da tela selecionada
 		gfxSwapBuffers(); // troca os buffers da tela selecionada
 		
-		gspWaitForVBlank(); // ainda não sei kkkkkk
+		gspWaitForVBlank();
 	
 		hidScanInput(); // Scan de entrada dos botoes
-		
-		u32 kDown = hidKeysDown(); // u32 = variavel inteira sem ser assinada ( sempre positiva ) recebe paramentro de "pressionar"
 		
 		if ( kDown & KEY_A ) {
 			
@@ -62,7 +75,7 @@ int main () {
 			
 			count++;
 
-		} 
+		}
 		
 		if ( kDown & KEY_B ) {
 			
@@ -70,7 +83,7 @@ int main () {
 
 			count++;
 
-		} 
+		}
 		
 		if ( kDown & KEY_X ) {
 			
@@ -98,7 +111,7 @@ int main () {
 			gspWaitForVBlank();
 			
 		}
-
+		
 		if ( kDown & KEY_SELECT ) {
 
 			return main();
@@ -107,7 +120,7 @@ int main () {
 		
 		if ( button == num_random ) {
 			
-			consoleSelect ( &TelaDeBaixo );
+			consoleSelect(&bottom_screen);
 			
 			printf ("\x1b[0;0H");
 
@@ -116,7 +129,7 @@ int main () {
 
 			printf ("Para reiniciar o jogo, aperte 'Select'\n");
 			
-			consoleSelect ( &TelaDeCima );
+			consoleSelect(&top_screen);
 			
 		}
 		
