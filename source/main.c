@@ -9,7 +9,7 @@ int main() {
 	
 	gfxInitDefault(); // inicia framebuffer LCD com o padrão GSP_BGR8_OES
 
-	PrintConsole top_screen, bottom_screen;
+	PrintConsole top_screen, bottom_screen; // Atribui às variaveis um padrão de dados sobre o uso do print na tela e retorna um ponteiro do consoleGetDefault()
 	consoleInit ( GFX_TOP, &top_screen ); // Iniciando a tela de cima
 	consoleInit ( GFX_BOTTOM, &bottom_screen ); // Iniciando a tela de baixo
 
@@ -28,13 +28,13 @@ int main() {
 	}
 
 	static SwkbdState teclado;
-	static char buffer_para_teclado[60];
+	static char texto_do_teclado[60];
 	SwkbdButton vButtonKB = SWKBD_BUTTON_NONE;
 
 	swkbdInit(&teclado, SWKBD_TYPE_NORMAL, 1, -3);
-	swkbdSetInitialText(&teclado, buffer_para_teclado);
+	swkbdSetInitialText(&teclado, texto_do_teclado);
 	swkbdSetHintText(&teclado, "Please enter your name");
-	vButtonKB = swkbdInputText(&teclado, buffer_para_teclado, sizeof(buffer_para_teclado));
+	vButtonKB = swkbdInputText(&teclado, texto_do_teclado, sizeof(texto_do_teclado));
 	
 	while ( aptMainLoop() ) { // Loop do sistena para manter scan
 
@@ -53,7 +53,7 @@ int main() {
 
 		}
 
-		printf ("Seja bem vindo %s ao ProjectHBHO do HackerOrientado\n", buffer_para_teclado);
+		printf ("Seja bem vindo %s ao ProjectHBHO do HackerOrientado\n", texto_do_teclado);
 		printf ("Hora atual -> %02i:%02i:%02i\n\n", Horas, Minutos, Segundos);
 
 		printf ("Pressione START para voltar ao HBL\n\n");
@@ -135,6 +135,11 @@ int main() {
 		
 	}
 	
+	gfxFlushBuffers();
+	gfxSwapBuffers();
+			
+	gspWaitForVBlank();
+
 	gfxExit();
 	return 0;
 	
